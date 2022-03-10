@@ -4,7 +4,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Auction, AuctionPhotos
+from .forms import NewAuction
 
 
 def index(request):
@@ -61,3 +62,44 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def create_listing(request):
+    if request.method == "POST": 
+        form = NewAuction(request.POST)
+        if form.is_valid():
+            # Save the form into DB and use the PK to show the auction
+                owner = request.user
+                item_title = request.POST["item_title"]
+                item_description = request.POST["item_description"]
+                item_category = request.POST["item_category"]
+                starting_bid = request.POST["starting_bid"]
+                image_url = request.POST["image_url"]
+
+
+                new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
+                    item_description=item_description, item_category=item_category, image_url=image_url)
+                new_auction.save()
+
+
+                # can't save photo until we have the object from Auction
+                # image = request.POST["photo"]
+                # image = AuctionPhotos(auction=new_auction, images=image)
+                # image.save()
+
+
+                
+
+
+    else:
+        form = NewAuction()
+        return render(request, 'auctions/create_listing.html', {'form' : form })
+
+def view_user_listings(request):
+     return render(request, 'auctions/my_listings.html')
+
+
+def view_past_listings(request):
+    pass
+
+def view_listing(request):
+    pass
