@@ -23,7 +23,7 @@ class NewAuction(forms.Form):
     item_category = forms.ChoiceField(choices=categories, required=True, label="Item Category") 
     starting_bid = forms.FloatField(min_value=0.00)
     # photo = forms.ImageField(label="Upload your photos", required=False)
-    iamge_url = forms.URLField()
+    image_url = forms.URLField()
 
     
 

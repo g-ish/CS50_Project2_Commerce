@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction, AuctionPhotos
+from .models import User, Auction
 from .forms import NewAuction
 
 
@@ -87,8 +87,8 @@ def create_listing(request):
                 # image.save()
 
 
-                
-
+                return HttpResponseRedirect(reverse("view_listing", {"pk" : new_auction.pk} ))
+        
 
     else:
         form = NewAuction()

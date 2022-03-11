@@ -27,13 +27,17 @@
                 <a class="nav-link" href="{% url 'past_listings' %}">Past Listings</a>
             </li>
             {% if user.is_authenticated %}
-            <li class=""nav-item">
-                <a class="nav-link" href="{% url 'user_listings' %}">My Listings</a>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'create_listing' %}">Create Listings</a>
             </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'user_listings' %}">My Listings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+            </li>
  
 
             {% else %}
@@ -45,8 +49,7 @@
                 </li>
             {% endif %}
 
-         
-
+        
         </ul>
         <hr>
         {% block body %}
