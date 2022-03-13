@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import User, Auction
+from .models import User, Auction, Bid, Comment
 from .forms import NewAuction
-
+from django.utils import timezone
+from datetime import datetime as dt
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -86,9 +87,11 @@ def create_listing(request):
                 # image = AuctionPhotos(auction=new_auction, images=image)
                 # image.save()
 
-
-                return HttpResponseRedirect(reverse("view_listing", {"pk" : new_auction.pk} ))
+                
+                return redirect(view_listing, new_auction.pk)
         
+        else:
+            print('form invalid')
 
     else:
         form = NewAuction()
@@ -101,5 +104,43 @@ def view_user_listings(request):
 def view_past_listings(request):
     pass
 
-def view_listing(request):
-    pass
+def view_listing(request, pk):
+    auction = Auction.objects.get(pk=pk)
+    
+    comments = Comment.objects.all().filter(auction=auction).values()
+    bids = Bid.objects.all().filter(auction=auction).values()
+
+    # get the highest bid while setting the minimum bid
+    highest_bid = bids.order_by('-amount')
+    highest_bid = float(highest_bid[0]['amount'])
+
+    time_left = auction.listing_duration - timezone.now()
+    time_left = str(time_left).split(":")
+    
+    days = time_left[0]
+    hours = time_left[1]
+    minutes = time_left[2].split(".")[0]
+
+
+    bid_data = {
+        'highest_bid' : highest_bid,
+        # new bid must be 10% above the previous
+        'minimum_bid' : highest_bid * 0.1 + highest_bid,
+        'bid_count' : bids.count(),
+        'days_remaining' : days,
+        'hours_remaining': hours,
+        'minutes_remaining': minutes
+        }
+
+    
+
+
+    comments = Comment.objects.all().filter(auction=auction)
+    listing = {
+        'auction' : auction,
+        'bid_data' : bid_data,
+        'comments' : comments,
+
+    }
+
+    return render(request, 'auctions/view_listing.html', {'listing' : listing})

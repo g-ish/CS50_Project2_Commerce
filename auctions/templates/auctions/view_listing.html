@@ -1,0 +1,78 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<div class="container">
+<div class="listing-area">
+    <h1>Listing: {{ listing.auction.item_title }}</h1>
+
+    {% if user.is_owner %}
+        <a href="">Delete Listing</a>
+    {% endif %}
+
+    <img src="{{ listing.auction.image_url }}">
+
+    <p>{{ listing.auction.item_description }}</p>
+</div>
+
+<div class="bid-area">
+    <h2>{{ listing.bid_data.highest_bid }}</h2>
+    <p>{{ listing.bid_data.bid_count }} bid(s) so far</p>
+    <p>
+        Time remaining: {{ listing.bid_data.days_remaining }} days,
+         {{listing.bid_data.hours_remaining }} hours,
+         {{listing.bid_data.minutes_remaining }} minutes remaining. 
+    </p>
+    {% if user.is_owner %}
+        
+
+    {% else %}
+
+        <form name="new-bid" class="new-bid-form" method="POST" class="mb-3">
+            {% csrf_token %}
+            
+            <label for="new-bid-input" class="form-label">New bid:</label>
+            <!-- Add +10%? to min new bid -->
+            <input type="number" id="new-bid-input" class="form-control" min="{{ listing.bid_data.minimum_bid}}" value="{{ listing.bid_data.minimum_bid}}"> 
+            <input type="submit" value="Place new bid" class="btn btn-primary">
+        </form>
+
+
+
+
+</div>   
+    {% endif %}
+    
+<div class="listing-stats">
+    <ul>
+        <li>Listed by: {{ listing.auction.owner }}</li>
+        <li>Category: {{ listing.auction.item_category }}</li>
+        <li>Date listed: {{ listing.auction.creation_date }}</li>
+
+        {% if listing.auction.watch_count > 0 %}
+            <li>{{ listing.auction.watch_count }} watcher(s).</li>
+        {% else %}
+            <li>No current watchers</li>
+        {% endif %}
+    </ul>
+</div>
+
+{{listing.test}}
+
+<h4>Comments</h4>
+{% for comment in listing.comments %}
+    <div class="comment border rounded">
+        <div class="comment comment-header">{{comment.get_username}} - {{comment.posted_date}}</div>
+        <div class="comment comment-body">{{comment.contents}}</div>
+</div>
+{% endfor %}
+{% if user.is_authenticated %}
+    <form name="new-comment" method="POST">
+        <div class="form-floating">
+            <textarea class="form-control" placeholder="Leave a new comment here" id="floatingTextarea2" style="height: 50px"></textarea>
+        </div>
+        <input type="submit" value="Submit new comment" class="btn btn-primary comment-form">
+{% endif %}
+
+</div>
+{% endblock %}

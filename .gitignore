@@ -1,0 +1,154 @@
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
+
+__pycache__/
+*__pycache__/
+**/__pycache__/
+# Backup files # 
+*.bak 
+
+# If you are using PyCharm # 
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Python # 
+*.py[cod] 
+*$py.class 
+
+# Distribution / packaging 
+.Python build/ 
+develop-eggs/ 
+dist/ 
+downloads/ 
+eggs/ 
+.eggs/ 
+lib/ 
+lib64/ 
+parts/ 
+sdist/ 
+var/ 
+wheels/ 
+*.egg-info/ 
+.installed.cfg 
+*.egg 
+*.manifest 
+*.spec 
+
+# Installer logs 
+pip-log.txt 
+pip-delete-this-directory.txt 
+
+# Unit test / coverage reports 
+htmlcov/ 
+.tox/ 
+.coverage 
+.coverage.* 
+.cache 
+.pytest_cache/ 
+nosetests.xml 
+coverage.xml 
+*.cover 
+.hypothesis/ 
+
+# Jupyter Notebook 
+.ipynb_checkpoints 
+
+# pyenv 
+.python-version 
+
+# celery 
+celerybeat-schedule.* 
+
+# SageMath parsed files 
+*.sage.py 
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/ 
+
+# mkdocs documentation 
+/site 
+
+# mypy 
+.mypy_cache/ 
+
+# Sublime Text # 
+*.tmlanguage.cache 
+*.tmPreferences.cache 
+*.stTheme.cache 
+*.sublime-workspace 
+*.sublime-project 
+
+# sftp configuration file 
+sftp-config.json 
+
+# Package control specific files Package 
+Control.last-run 
+Control.ca-list 
+Control.ca-bundle 
+Control.system-ca-bundle 
+GitHub.sublime-settings 
+
+# Visual Studio Code # 
+*.vscode/
+!.vscode/settings.json 
+!.vscode/tasks.json 
+!.vscode/launch.json 
+!.vscode/extensions.json 
+.history
+.vscode/launch.json
+auctions/migrations/__pycache__/0002_auction_comment_bid_user_watch_list.cpython-39.pyc
+auctions/migrations/__pycache__/0003_remove_auction_bidders.cpython-39.pyc
+auctions/migrations/__pycache__/0004_alter_comment_posteddate.cpython-39.pyc
+auctions/migrations/__pycache__/0005_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0006_alter_auction_auction_finished_and_more.cpython-39.pyc
+auctions/migrations/__pycache__/0007_alter_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0008_auctionphotos_alter_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0009_remove_auction_photo_remove_auctionphotos_photo_and_more.cpython-39.pyc
+auctions/migrations/__pycache__/0010_alter_auction_item_description.cpython-39.pyc
+auctions/migrations/__pycache__/0011_auction_starting_bid.cpython-39.pyc
+auctions/migrations/__pycache__/0012_auction_item_title_alter_auction_starting_bid.cpython-39.pyc
+auctions/migrations/__pycache__/0013_remove_auction_image.cpython-39.pyc
+auctions/migrations/__pycache__/0014_alter_auctionphotos_auction.cpython-39.pyc

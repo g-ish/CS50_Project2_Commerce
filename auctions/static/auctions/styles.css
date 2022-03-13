@@ -1,3 +1,30 @@
 body {
     padding: 10px;
 }
+.comment {
+    margin: 10px 0px;  
+}
+
+.comment-header {
+    padding-left: 5px; 
+    font-weight: bold;
+}
+.comment-body {
+    padding-left: 15px; 
+}
+
+.comment-form {
+    margin-top: 5px; 
+}
+
+#new-bid-input {
+    width: 15%;
+    margin-bottom: 5px; 
+}
+.container {
+    margin-left: 10px; 
+}
+
+.listing-stats {
+    margin-top: 10px; 
+}
