@@ -4,5 +4,17 @@
 
     <h2>Active Listings</h2>
 
-    TODO
+    
+    {% for auction in auctions %}
+    <div class="auction-item">
+        <div class="auction-item-photo">
+            <img src="{{ auction.image_url}}">
+        </div>
+        <div class="auction-item-body">
+            <p>{{ auction.item_title }}</p>
+           
+        </div>
+    </div>
+    {% endfor %}
+
 {% endblock %}

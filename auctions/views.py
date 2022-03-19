@@ -10,7 +10,11 @@ from django.utils import timezone
 from datetime import datetime as dt
 
 def index(request):
-    return render(request, "auctions/index.html")
+
+    auctions = Auction.objects.all().order_by('-creation_date')
+
+
+    return render(request, "auctions/index.html", {"auctions" : auctions})
 
 
 def login_view(request):
@@ -67,6 +71,8 @@ def register(request):
 def create_listing(request):
     if request.method == "POST": 
         form = NewAuction(request.POST)
+
+        print(request.POST['listing_duration'])
         if form.is_valid():
             # Save the form into DB and use the PK to show the auction
                 owner = request.user
@@ -75,10 +81,11 @@ def create_listing(request):
                 item_category = request.POST["item_category"]
                 starting_bid = request.POST["starting_bid"]
                 image_url = request.POST["image_url"]
+                listing_duration = request.POST['listing_duration']
 
 
                 new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
-                    item_description=item_description, item_category=item_category, image_url=image_url)
+                    item_description=item_description, item_category=item_category, listing_duration=listing_duration, image_url=image_url)
                 new_auction.save()
 
 
@@ -110,10 +117,12 @@ def view_listing(request, pk):
     comments = Comment.objects.all().filter(auction=auction).values()
     bids = Bid.objects.all().filter(auction=auction).values()
 
-    # get the highest bid while setting the minimum bid
-    highest_bid = bids.order_by('-amount')
-    highest_bid = float(highest_bid[0]['amount'])
+    # created new dedicated field for highest bid 
+    # # get the highest bid while setting the minimum bid
+    # highest_bid = bids.order_by('-amount')
+    # highest_bid = float(highest_bid[0]['amount'])
 
+    
     time_left = auction.listing_duration - timezone.now()
     time_left = str(time_left).split(":")
     
@@ -123,7 +132,7 @@ def view_listing(request, pk):
 
 
     bid_data = {
-        'highest_bid' : highest_bid,
+        'highest_bid' : auction.highest_bid,
         # new bid must be 10% above the previous
         'minimum_bid' : highest_bid * 0.1 + highest_bid,
         'bid_count' : bids.count(),

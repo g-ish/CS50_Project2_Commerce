@@ -34,6 +34,7 @@ class Auction(models.Model):
     (AUTOMOBILES, 'Automobiles'),
     (OTHER, 'Other'),
     ]
+
     
     owner = models.ForeignKey('User',  on_delete=models.CASCADE, related_name="listings")
     item_title = models.CharField(max_length=64)
@@ -46,6 +47,7 @@ class Auction(models.Model):
         help_text="Cannot be in the past."
         )
  
+    highest_bid = models.FloatField(blank=True)
     ended_date = models.DateTimeField(blank=True, null=True)
     auction_finished = models.BooleanField(blank=True, null=True)
     image_url = models.URLField(blank=True)
@@ -54,6 +56,10 @@ class Auction(models.Model):
 
     def __str___(self):
         return self.pk  
+
+    def save(self, *args, **kwargs):
+        self.highest_bid = self.starting_bid
+        super(Auction, self).save(*args, **kwargs)
 
 class Comment(models.Model): 
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comments")

@@ -28,3 +28,7 @@ body {
 .listing-stats {
     margin-top: 10px; 
 }
+
+.auction-item {
+    display: flex; 
+}
