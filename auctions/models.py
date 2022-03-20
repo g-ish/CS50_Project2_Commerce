@@ -58,8 +58,13 @@ class Auction(models.Model):
         return self.pk  
 
     def save(self, *args, **kwargs):
-        self.highest_bid = self.starting_bid
-        super(Auction, self).save(*args, **kwargs)
+        # Sets highest bid to starting bid when creating instance
+        if self.highest_bid == self.starting_bid:
+            self.highest_bid = self.starting_bid
+        # update the highest bid 
+        else:
+            self.highest_bid = self.highest_bid
+            super(Auction, self).save(*args, **kwargs)
 
 class Comment(models.Model): 
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comments")

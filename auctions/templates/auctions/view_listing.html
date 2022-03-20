@@ -33,7 +33,9 @@
             
             <label for="new-bid-input" class="form-label">New bid:</label>
             <!-- Add +10%? to min new bid -->
-            <input type="number" id="new-bid-input" class="form-control" min="{{ listing.bid_data.minimum_bid}}" value="{{ listing.bid_data.minimum_bid}}"> 
+
+            <p>Minimum new bid: {{listing.bid_data.minimum_bid }} </p>
+            <input type="number" id="new-bid-input" class="form-control" name="new-bid" min="{{ listing.bid_data.minimum_bid}}" value="{{ listing.bid_data.minimum_bid}}"> 
             <input type="submit" value="Place new bid" class="btn btn-primary">
         </form>
 

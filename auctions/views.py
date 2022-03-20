@@ -113,19 +113,12 @@ def view_past_listings(request):
 
 def view_listing(request, pk):
     auction = Auction.objects.get(pk=pk)
-    
     comments = Comment.objects.all().filter(auction=auction).values()
     bids = Bid.objects.all().filter(auction=auction).values()
-
-    # created new dedicated field for highest bid 
-    # # get the highest bid while setting the minimum bid
-    # highest_bid = bids.order_by('-amount')
-    # highest_bid = float(highest_bid[0]['amount'])
-
-    
+    comments = Comment.objects.all().filter(auction=auction)
     time_left = auction.listing_duration - timezone.now()
     time_left = str(time_left).split(":")
-    
+        
     days = time_left[0]
     hours = time_left[1]
     minutes = time_left[2].split(".")[0]
@@ -134,22 +127,47 @@ def view_listing(request, pk):
     bid_data = {
         'highest_bid' : auction.highest_bid,
         # new bid must be 10% above the previous
-        'minimum_bid' : highest_bid * 0.1 + highest_bid,
+        'minimum_bid' : auction.highest_bid * 0.1 + auction.highest_bid,
         'bid_count' : bids.count(),
         'days_remaining' : days,
         'hours_remaining': hours,
         'minutes_remaining': minutes
         }
 
-    
-
-
+    listing = {
+        'auction' : auction,
+        'bid_data' : bid_data,
+        'comments' : comments,
+        }
     comments = Comment.objects.all().filter(auction=auction)
     listing = {
         'auction' : auction,
         'bid_data' : bid_data,
         'comments' : comments,
+        }
+    if request.method == "GET":
+       return render(request, 'auctions/view_listing.html', {'listing' : listing})
+    elif request.method == "POST":
+        # check if POST is for a new comment, new bid or both
+        # if request.POST['new_comment'] != Null: 
 
-    }
+        new_bid = Bid(owner = request.user, auction=auction, amount=request.POST["new-bid"])
+        new_bid.save()
+        auction.highest_bid =  request.POST["new-bid"]
+        auction.save(update_fields=['highest_bid'])
+        auction = Auction.objects.get(pk=pk)
 
-    return render(request, 'auctions/view_listing.html', {'listing' : listing})
+        bid_data = {
+            'highest_bid' : auction.highest_bid,
+            # new bid must be 10% above the previous
+            'minimum_bid' : auction.highest_bid * 0.1 + auction.highest_bid,
+            'bid_count' : bids.count(),
+            'days_remaining' : days,
+            'hours_remaining': hours,
+            'minutes_remaining': minutes
+            }
+
+        all_bids = Bid.objects.all().filter(auction=auction)
+        all_bids = all_bids.order_by('amount')
+        print(all_bids[0].amount)
+        return render(request, 'auctions/view_listing.html', {'listing' : listing})
