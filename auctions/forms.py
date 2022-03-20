@@ -30,5 +30,6 @@ class NewAuction(forms.Form):
 
     
 
-
+class NewComment(forms.Form):
+    new_comment = forms.CharField(widget=forms.Textarea)
 

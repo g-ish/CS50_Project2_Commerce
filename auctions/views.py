@@ -1,3 +1,5 @@
+from ast import Pass
+from asyncio.windows_events import NULL
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -5,9 +7,28 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from .models import User, Auction, Bid, Comment
-from .forms import NewAuction
+from .forms import NewAuction, NewComment
 from django.utils import timezone
 from datetime import datetime as dt
+
+# Unused
+# def get_min_bid(current_price):
+#     # based on ebay's minimum bid increments; https://www.ebay.co.uk/help/buying/bidding/automatic-bidding?id=4014&mkevt=1&mkcid=1&mkrid=710-53481-19255-0&campid=5336728181&customid=&toolid=10001
+#     if current_price < 10:
+#         return 0.05
+#     elif current_price < 4.99:
+#         return 0.20
+#     elif current_price < 14.99:
+#         return 0.5
+#     elif current_price < 59.99:
+#         return 1.00
+#     elif current_price < 149.99:
+#         return 2.00
+#     elif current_price < 299.99:
+#         return 5.00
+#     elif current_price < 599.99:
+#         return 10.00
+
 
 def index(request):
 
@@ -87,13 +108,6 @@ def create_listing(request):
                 new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
                     item_description=item_description, item_category=item_category, listing_duration=listing_duration, image_url=image_url)
                 new_auction.save()
-
-
-                # can't save photo until we have the object from Auction
-                # image = request.POST["photo"]
-                # image = AuctionPhotos(auction=new_auction, images=image)
-                # image.save()
-
                 
                 return redirect(view_listing, new_auction.pk)
         
@@ -114,33 +128,39 @@ def view_past_listings(request):
 def view_listing(request, pk):
     auction = Auction.objects.get(pk=pk)
     comments = Comment.objects.all().filter(auction=auction).values()
-    bids = Bid.objects.all().filter(auction=auction).values()
+    # bids = Bid.objects.all().filter(auction=auction).values()
+    highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+
     comments = Comment.objects.all().filter(auction=auction)
+
+    # Creating the 'duration left' fields.
     time_left = auction.listing_duration - timezone.now()
     time_left = str(time_left).split(":")
-        
-    days = time_left[0]
-    hours = time_left[1]
-    minutes = time_left[2].split(".")[0]
 
+    # 'days' only found in time_left if hours > 24. 
+    if 'days' in time_left[0]:
+        time = time_left[0].split(", ")
+        days = time[0]
+        hours = time[1]
+    else:
+        days = 0
+        hours= time_left[0]
+    minutes = time_left[1]
 
     bid_data = {
-        'highest_bid' : auction.highest_bid,
+        'highest_bid' : round(highest_bid.amount,2), 
         # new bid must be 10% above the previous
-        'minimum_bid' : auction.highest_bid * 0.1 + auction.highest_bid,
-        'bid_count' : bids.count(),
+        'minimum_bid' : round(highest_bid.amount * 0.1 + highest_bid.amount,2),
+        'bid_count' : Bid.objects.all().filter(auction=auction).count(),
         'days_remaining' : days,
         'hours_remaining': hours,
         'minutes_remaining': minutes
         }
 
-    listing = {
-        'auction' : auction,
-        'bid_data' : bid_data,
-        'comments' : comments,
-        }
     comments = Comment.objects.all().filter(auction=auction)
+    print(auction.pk)
     listing = {
+        'auction_pk' : auction.pk,
         'auction' : auction,
         'bid_data' : bid_data,
         'comments' : comments,
@@ -148,26 +168,15 @@ def view_listing(request, pk):
     if request.method == "GET":
        return render(request, 'auctions/view_listing.html', {'listing' : listing})
     elif request.method == "POST":
-        # check if POST is for a new comment, new bid or both
-        # if request.POST['new_comment'] != Null: 
-
         new_bid = Bid(owner = request.user, auction=auction, amount=request.POST["new-bid"])
         new_bid.save()
-        auction.highest_bid =  request.POST["new-bid"]
-        auction.save(update_fields=['highest_bid'])
-        auction = Auction.objects.get(pk=pk)
+        return redirect(view_listing, pk)
 
-        bid_data = {
-            'highest_bid' : auction.highest_bid,
-            # new bid must be 10% above the previous
-            'minimum_bid' : auction.highest_bid * 0.1 + auction.highest_bid,
-            'bid_count' : bids.count(),
-            'days_remaining' : days,
-            'hours_remaining': hours,
-            'minutes_remaining': minutes
-            }
+def new_comment(request, pk):
+    form = NewComment()
+    if request.method == "GET":
+        return render(request, 'auctions/new_comment.html', {'form' : form})
+    else:
+        #Pass
 
-        all_bids = Bid.objects.all().filter(auction=auction)
-        all_bids = all_bids.order_by('amount')
-        print(all_bids[0].amount)
-        return render(request, 'auctions/view_listing.html', {'listing' : listing})
+    

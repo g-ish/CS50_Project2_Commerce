@@ -47,7 +47,6 @@ class Auction(models.Model):
         help_text="Cannot be in the past."
         )
  
-    highest_bid = models.FloatField(blank=True)
     ended_date = models.DateTimeField(blank=True, null=True)
     auction_finished = models.BooleanField(blank=True, null=True)
     image_url = models.URLField(blank=True)
@@ -57,14 +56,6 @@ class Auction(models.Model):
     def __str___(self):
         return self.pk  
 
-    def save(self, *args, **kwargs):
-        # Sets highest bid to starting bid when creating instance
-        if self.highest_bid == self.starting_bid:
-            self.highest_bid = self.starting_bid
-        # update the highest bid 
-        else:
-            self.highest_bid = self.highest_bid
-            super(Auction, self).save(*args, **kwargs)
 
 class Comment(models.Model): 
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comments")
@@ -87,7 +78,7 @@ class Comment(models.Model):
 class Bid(models.Model):
     owner = models.ForeignKey('User', on_delete=models.CASCADE)
     auction = models.ForeignKey('Auction', on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    amount = models.FloatField()
     class Meta:
         ordering = ['amount']
 

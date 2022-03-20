@@ -16,7 +16,7 @@
 </div>
 
 <div class="bid-area">
-    <h2>{{ listing.bid_data.highest_bid }}</h2>
+    <h2>Price: {{ listing.bid_data.highest_bid }}</h2>
     <p>{{ listing.bid_data.bid_count }} bid(s) so far</p>
     <p>
         Time remaining: {{ listing.bid_data.days_remaining }} days,
@@ -61,20 +61,17 @@
 
 {{listing.test}}
 
-<h4>Comments</h4>
-{% for comment in listing.comments %}
-    <div class="comment border rounded">
-        <div class="comment comment-header">{{comment.get_username}} - {{comment.posted_date}}</div>
-        <div class="comment comment-body">{{comment.contents}}</div>
-</div>
-{% endfor %}
-{% if user.is_authenticated %}
-    <form name="new-comment" method="POST">
-        <div class="form-floating">
-            <textarea class="form-control" placeholder="Leave a new comment here" id="floatingTextarea2" style="height: 50px"></textarea>
+<h4>Comments {{listing.comments.count }}</h4>
+{% if listing.comments %}
+    {% for comment in listing.comments %}
+        <div class="comment border rounded">
+            <div class="comment comment-header">{{comment.get_username}} - {{comment.posted_date}}</div>
+            <div class="comment comment-body">{{comment.contents}}</div>
         </div>
-        <input type="submit" value="Submit new comment" class="btn btn-primary comment-form">
+    {% endfor %}
 {% endif %}
+    {% if user.is_authenticated %}
+        <a href="{% url 'new_comment' listing.auction_pk %}" class="btn btn-primary comment-form">Submit new comment</a>
+    {% endif %}
 
-</div>
 {% endblock %}
