@@ -23,7 +23,7 @@ class NewAuction(forms.Form):
     item_category = forms.ChoiceField(choices=categories, required=True, label="Item Category") 
     starting_bid = forms.FloatField(min_value=0.00)
 
-    # this is causing an erorr, date works okay but datetime doesnt bring up the calendar. 
+    # this is causing an eror, date works okay but datetime doesnt bring up the calendar. 
     listing_duration = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime'}))
     # photo = forms.ImageField(label="Upload your photos", required=False)
     image_url = forms.URLField()
@@ -31,5 +31,6 @@ class NewAuction(forms.Form):
     
 
 class NewComment(forms.Form):
-    new_comment = forms.CharField(widget=forms.Textarea)
+
+    new_comment = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'style':'width: 50%'}))
 

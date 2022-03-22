@@ -32,10 +32,19 @@ from datetime import datetime as dt
 
 def index(request):
 
-    auctions = Auction.objects.all().order_by('-creation_date')
+
+    auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
+
+    # attach the highest bid to each auction object
+    for auction in auctions:
+        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+        highest_bid = round(highest_bid.amount, 2)
+    print(type(auctions))
 
 
-    return render(request, "auctions/index.html", {"auctions" : auctions})
+
+
+    return render(request, "auctions/index.html", {"auctions" : auctions, 'bids': bids})
 
 
 def login_view(request):
@@ -127,10 +136,14 @@ def view_past_listings(request):
 
 def view_listing(request, pk):
     auction = Auction.objects.get(pk=pk)
-    comments = Comment.objects.all().filter(auction=auction).values()
-    # bids = Bid.objects.all().filter(auction=auction).values()
-    highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
 
+    comments = Comment.objects.all().filter(auction=auction).values()
+    bids = Bid.objects.all().filter(auction=auction)
+    if not bids.exists():
+        highest_bid = auction.starting_bid
+    else:
+        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+        highest_bid = round(highest_bid.amount, 2)
     comments = Comment.objects.all().filter(auction=auction)
 
     # Creating the 'duration left' fields.
@@ -147,10 +160,12 @@ def view_listing(request, pk):
         hours= time_left[0]
     minutes = time_left[1]
 
+
+
     bid_data = {
-        'highest_bid' : round(highest_bid.amount,2), 
+        'highest_bid' : highest_bid, 
         # new bid must be 10% above the previous
-        'minimum_bid' : round(highest_bid.amount * 0.1 + highest_bid.amount,2),
+        'minimum_bid' : round(highest_bid * 0.1 + highest_bid,2),
         'bid_count' : Bid.objects.all().filter(auction=auction).count(),
         'days_remaining' : days,
         'hours_remaining': hours,
@@ -158,7 +173,6 @@ def view_listing(request, pk):
         }
 
     comments = Comment.objects.all().filter(auction=auction)
-    print(auction.pk)
     listing = {
         'auction_pk' : auction.pk,
         'auction' : auction,
@@ -173,10 +187,12 @@ def view_listing(request, pk):
         return redirect(view_listing, pk)
 
 def new_comment(request, pk):
+    auction = Auction.objects.get(pk=pk)
+
     form = NewComment()
     if request.method == "GET":
         return render(request, 'auctions/new_comment.html', {'form' : form})
     else:
-        #Pass
-
-    
+        new_comment = Comment(owner = request.user, auction=auction, contents=request.POST["new_comment"])
+        new_comment.save()
+        return redirect(view_listing, auction.pk)

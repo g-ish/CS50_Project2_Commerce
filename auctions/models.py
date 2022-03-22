@@ -48,7 +48,7 @@ class Auction(models.Model):
         )
  
     ended_date = models.DateTimeField(blank=True, null=True)
-    auction_finished = models.BooleanField(blank=True, null=True)
+    auction_finished = models.BooleanField(default=False)
     image_url = models.URLField(blank=True)
     class Meta:
         ordering = ['-creation_date']
@@ -59,7 +59,7 @@ class Auction(models.Model):
 
 class Comment(models.Model): 
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comments")
-    auction = models.ForeignKey('AUction', on_delete=models.CASCADE)
+    auction = models.ForeignKey('Auction', on_delete=models.CASCADE)
     contents =  models.TextField(max_length=500)
     posted_date = models.DateTimeField(auto_now_add=True)
     class Meta:
@@ -71,9 +71,6 @@ class Comment(models.Model):
     def get_username(self):
         return self.owner.username
         
-# class CommentManager(models.Manager):
-#     def get_username(self):
-#         return self.owner.username
 
 class Bid(models.Model):
     owner = models.ForeignKey('User', on_delete=models.CASCADE)
