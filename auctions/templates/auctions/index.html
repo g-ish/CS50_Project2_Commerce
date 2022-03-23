@@ -12,8 +12,8 @@
         </div>
         <div class="auction-item-body">
             <p>{{ auction.item_title }}</p>
-            <p>{{ auction.starting_bid}} </p>
-            <div></div>
+            <div>{{ auction.highest_bid}}</div>
+            <div>{{ auction.bid_count }}</div>
         </div>
     </div>
     {% endfor %}

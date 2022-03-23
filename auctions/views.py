@@ -37,14 +37,14 @@ def index(request):
 
     # attach the highest bid to each auction object
     for auction in auctions:
-        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
         highest_bid = round(highest_bid.amount, 2)
-    print(type(auctions))
-
-
-
-
-    return render(request, "auctions/index.html", {"auctions" : auctions, 'bids': bids})
+        if highest_bid < auction['starting_bid']:
+            auction['highest_bid'] = auction['starting_bid']
+        else:
+            auction['highest_bid'] = highest_bid
+        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+    return render(request, "auctions/index.html", {"auctions" : auctions})
 
 
 def login_view(request):
