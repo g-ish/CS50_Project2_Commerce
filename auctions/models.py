@@ -19,7 +19,8 @@ class User(AbstractUser):
     def __str___(self):
         return self.username  
 
-
+# Todo: convert listing duration into a float field that represents hours (maybe a drop down list i.e 1 day, 2 days, 1 week etc?)
+# Then use JS to dynamically show end date based on their input 
 class Auction(models.Model):
     FURNITURE = "Furniture"
     ELECTRONICS = "Electronics"

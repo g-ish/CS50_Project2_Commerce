@@ -103,25 +103,25 @@ def create_listing(request):
         form = NewAuction(request.POST)
 
         print(request.POST['listing_duration'])
-        if form.is_valid():
+        # if form.is_valid():
             # Save the form into DB and use the PK to show the auction
-                owner = request.user
-                item_title = request.POST["item_title"]
-                item_description = request.POST["item_description"]
-                item_category = request.POST["item_category"]
-                starting_bid = request.POST["starting_bid"]
-                image_url = request.POST["image_url"]
-                listing_duration = request.POST['listing_duration']
+        owner = request.user
+        item_title = request.POST["item_title"]
+        item_description = request.POST["item_description"]
+        item_category = request.POST["item_category"]
+        starting_bid = request.POST["starting_bid"]
+        image_url = request.POST["image_url"]
+        listing_duration = request.POST['listing_duration']
 
 
-                new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
-                    item_description=item_description, item_category=item_category, listing_duration=listing_duration, image_url=image_url)
-                new_auction.save()
-                
-                return redirect(view_listing, new_auction.pk)
+        new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
+            item_description=item_description, item_category=item_category, listing_duration=listing_duration, image_url=image_url)
+        new_auction.save()
         
-        else:
-            print('form invalid')
+        return redirect(view_listing, new_auction.pk)
+        
+        # else:
+        #     print('form invalid')
 
     else:
         form = NewAuction()
