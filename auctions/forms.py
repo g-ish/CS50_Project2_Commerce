@@ -24,7 +24,7 @@ class NewAuction(forms.Form):
     starting_bid = forms.FloatField(min_value=0.00)
 
     # this is causing an eror, date works okay but datetime doesnt bring up the calendar. 
-    listing_duration = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime'}))
+    listing_duration = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'class':'datepicker'}))
     # photo = forms.ImageField(label="Upload your photos", required=False)
     image_url = forms.URLField()
 
