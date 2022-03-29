@@ -17,6 +17,8 @@ categories = [
     (OTHER, 'Other'),
     ]
 
+
+# Convert Django's time into HTML format 
 def html_time():
     time = str(timezone.now())
     time = time.replace("\s", "T")
@@ -44,4 +46,4 @@ class NewComment(forms.Form):
     new_comment = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'style':'width: 50%'}))
 
 class CategoryFilter(forms.Form):
-        item_category = forms.ChoiceField(choices=categories, label="Filter by item category here") 
+        item_category = forms.ChoiceField(choices=categories, label="Item Category") 

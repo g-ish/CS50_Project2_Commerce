@@ -15,7 +15,7 @@ def index(request):
     print(Auction.categories)
 
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
-
+    print(auctions)
     # attach the highest bid to each auction object
     for auction in auctions:
         highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
@@ -111,11 +111,36 @@ def create_listing(request):
         return render(request, 'auctions/create_listing.html', {'form' : form })
 
 def view_user_listings(request):
-     return render(request, 'auctions/my_listings.html')
+    user = request.user
+    auctions = Auction.objects.filter(auction_finished=False, owner=user).order_by('-creation_date').values()
+
+    # attach the highest bid to each auction object
+    for auction in auctions:
+        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
+        try:
+            highest_bid = round(highest_bid.amount, 2)
+            auction['highest_bid'] = highest_bid
+        except:
+            auction['highest_bid'] = auction['starting_bid']
+        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+    return render(request, "auctions/my_listings.html", {"auctions" : auctions})
+
+
 
 
 def view_past_listings(request):
-    pass
+    auctions = Auction.objects.filter(auction_finished=True).order_by('-creation_date').values()
+
+    # attach the highest bid to each auction object
+    for auction in auctions:
+        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
+        try:
+            highest_bid = round(highest_bid.amount, 2)
+            auction['highest_bid'] = highest_bid
+        except:
+            auction['highest_bid'] = auction['starting_bid']
+        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+    return render(request, "auctions/past_listings.html", {"auctions" : auctions})
 
 def view_listing(request, pk):
     auction = Auction.objects.get(pk=pk)

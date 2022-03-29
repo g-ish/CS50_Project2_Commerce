@@ -2,11 +2,26 @@
 
 {% block body %}
 
-    <a class="nav-link" href="{% url 'create_listing' %}" class="btn btn-primary">Create Listing</a>
-
-    <h2>my Listings</h2>
-
-   
-
-    TODO
+    <h2>My Listings</h2>
+    
+    {% if auctions|length  %}
+    {% for auction in auctions %}
+    <a href="{% url 'view_listing' pk=auction.id  %}" class="auction-anchor">
+        <div class="auction-item">
+            <div class="auction-item-photo-container">
+                <img class="auction-item-photo"src="{{ auction.image_url}}">
+            </div>
+            <div class="auction-item-body">
+                <h4>{{ auction.item_title }}</h4>
+                <h5>Price: £ <span>{{ auction.highest_bid}}</span></h5>
+                <h5>Bids: {{ auction.bid_count }}</h5>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    
+    {% else %}
+    <p>You have no auctions. <a href="{% url 'create_listing' %}">Create one now. </a></p>
+    
+    {% endif %}
 {% endblock %}
