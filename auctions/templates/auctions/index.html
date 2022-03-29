@@ -9,6 +9,7 @@
     </div>
 
     {% for auction in auctions %}
+    <a href="{% url 'view_listing' pk=auction.id  %}" class="auction-anchor">
     <div class="auction-item">
         <div class="auction-item-photo-container">
             <img class="auction-item-photo"src="{{ auction.image_url}}">
@@ -18,7 +19,9 @@
             <h5>Price: £ <span>{{ auction.highest_bid}}</span></h5>
             <h5>Bids: {{ auction.bid_count }}</h5>
         </div>
+
     </div>
+</a>
     {% endfor %}
 
 {% endblock %}
