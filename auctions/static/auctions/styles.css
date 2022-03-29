@@ -31,8 +31,9 @@ body {
 
 /* auction flex container */
 .auction-item {
+    margin-top: 10px; 
     display: flex; 
-    border: solid;
+    border: solid 1px;
     border-color: #a8a2a2;
     border-radius: 10px; 
     padding: 10px; 
@@ -40,6 +41,7 @@ body {
 }
 
 .auction-item-photo { 
+    border-radius: 10px;
     object-fit: cover;
     max-width: 600px;
     height: auto;
@@ -54,4 +56,5 @@ body {
 
 h5 span {
     font-weight: 0.9;
+    
 }

@@ -1,19 +1,15 @@
 from django import forms
 from django.utils import timezone
-def html_time():
-    time = str(timezone.now())
-    time = time.replace("\s", "T")
-    return time
 
-class NewAuction(forms.Form):
+
+
+FURNITURE = "Furniture"
+ELECTRONICS = "Electronics"
+SPORTS_EQUIPMENT = "Sports Equipment"
+AUTOMOBILES = "Automobiles"
+OTHER = "Other"
     
-    FURNITURE = "Furniture"
-    ELECTRONICS = "Electronics"
-    SPORTS_EQUIPMENT = "Sports Equipment"
-    AUTOMOBILES = "Automobiles"
-    OTHER = "Other"
-    
-    categories = [
+categories = [
     (FURNITURE, 'Furniture'),
     (ELECTRONICS, 'Electronics'),
     (SPORTS_EQUIPMENT, 'Sports Equipment'),
@@ -21,7 +17,13 @@ class NewAuction(forms.Form):
     (OTHER, 'Other'),
     ]
 
-    
+def html_time():
+    time = str(timezone.now())
+    time = time.replace("\s", "T")
+    return time
+
+class NewAuction(forms.Form):
+        
     item_title = forms.CharField(max_length=64, required=True, label="Item title")
     item_description = forms.CharField(widget=forms.Textarea, required=True, label="Item Description")
     item_category = forms.ChoiceField(choices=categories, required=True, label="Item Category") 
@@ -41,3 +43,5 @@ class NewAuction(forms.Form):
 class NewComment(forms.Form):
     new_comment = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'style':'width: 50%'}))
 
+class CategoryFilter(forms.Form):
+        item_category = forms.ChoiceField(choices=categories, label="Filter by item category here") 

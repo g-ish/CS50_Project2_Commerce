@@ -11,38 +11,19 @@ from .forms import NewAuction, NewComment
 from django.utils import timezone
 from datetime import datetime as dt
 
-# Unused
-# def get_min_bid(current_price):
-#     # based on ebay's minimum bid increments; https://www.ebay.co.uk/help/buying/bidding/automatic-bidding?id=4014&mkevt=1&mkcid=1&mkrid=710-53481-19255-0&campid=5336728181&customid=&toolid=10001
-#     if current_price < 10:
-#         return 0.05
-#     elif current_price < 4.99:
-#         return 0.20
-#     elif current_price < 14.99:
-#         return 0.5
-#     elif current_price < 59.99:
-#         return 1.00
-#     elif current_price < 149.99:
-#         return 2.00
-#     elif current_price < 299.99:
-#         return 5.00
-#     elif current_price < 599.99:
-#         return 10.00
-
-
 def index(request):
-
+    print(Auction.categories)
 
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
 
     # attach the highest bid to each auction object
     for auction in auctions:
         highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
-        highest_bid = round(highest_bid.amount, 2)
-        if highest_bid < auction['starting_bid']:
-            auction['highest_bid'] = auction['starting_bid']
-        else:
+        try:
+            highest_bid = round(highest_bid.amount, 2)
             auction['highest_bid'] = highest_bid
+        except:
+            auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
     return render(request, "auctions/index.html", {"auctions" : auctions})
 
