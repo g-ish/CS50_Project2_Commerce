@@ -29,6 +29,29 @@ body {
     margin-top: 10px; 
 }
 
+/* auction flex container */
 .auction-item {
     display: flex; 
+    border: solid;
+    border-color: #a8a2a2;
+    border-radius: 10px; 
+    padding: 10px; 
+    width: 60%; 
+}
+
+.auction-item-photo { 
+    object-fit: cover;
+    max-width: 600px;
+    height: auto;
+}
+
+.auction-item-body {
+    margin: 10px; 
+    padding: 10px; 
+}
+
+
+
+h5 span {
+    font-weight: 0.9;
 }

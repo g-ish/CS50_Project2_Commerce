@@ -99,6 +99,8 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def create_listing(request):
+    time = str(timezone.now())
+    print(time[:19])
     if request.method == "POST": 
         form = NewAuction(request.POST)
 

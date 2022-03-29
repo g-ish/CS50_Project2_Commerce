@@ -7,13 +7,13 @@
     
     {% for auction in auctions %}
     <div class="auction-item">
-        <div class="auction-item-photo">
-            <img src="{{ auction.image_url}}">
+        <div class="auction-item-photo-container">
+            <img class="auction-item-photo"src="{{ auction.image_url}}">
         </div>
         <div class="auction-item-body">
-            <p>{{ auction.item_title }}</p>
-            <div>{{ auction.highest_bid}}</div>
-            <div>Bids: {{ auction.bid_count }}</div>
+            <h4>{{ auction.item_title }}</h4>
+            <h5>Price: £ <span>{{ auction.highest_bid}}</span></h5>
+            <h5>Bids: {{ auction.bid_count }}</h5>
         </div>
     </div>
     {% endfor %}
