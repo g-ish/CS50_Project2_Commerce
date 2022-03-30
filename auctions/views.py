@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import User, Auction, Bid, Comment
+from .models import User, Auction, Bid, Comment, Watchlist
 from .forms import NewAuction, NewComment
 from django.utils import timezone
 from datetime import datetime as dt
@@ -15,7 +15,6 @@ def index(request):
     print(Auction.categories)
 
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
-    print(auctions)
     # attach the highest bid to each auction object
     for auction in auctions:
         highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
@@ -81,11 +80,9 @@ def register(request):
 
 def create_listing(request):
     time = str(timezone.now())
-    print(time[:19])
     if request.method == "POST": 
         form = NewAuction(request.POST)
 
-        print(request.POST['listing_duration'])
         # if form.is_valid():
             # Save the form into DB and use the PK to show the auction
         owner = request.user
@@ -154,6 +151,9 @@ def view_listing(request, pk):
         highest_bid = round(highest_bid.amount, 2)
     comments = Comment.objects.all().filter(auction=auction)
 
+
+
+
     # Creating the 'duration left' fields.
     time_left = auction.listing_duration - timezone.now()
     time_left = str(time_left).split(":")
@@ -188,8 +188,16 @@ def view_listing(request, pk):
         'comments' : comments,
         }
     if request.method == "GET":
-       return render(request, 'auctions/view_listing.html', {'listing' : listing})
+        watchers = Watchlist.objects.filter(owner=request.user, auction=auction.id)
+        on_watch = False
+        for watcher in watchers: 
+            if watcher.owner.get_username() == request.user.get_username():
+                on_watch = True
+            else:
+                on_watch = False
+        return render(request, 'auctions/view_listing.html', {'listing' : listing, 'on_watch': on_watch})
     elif request.method == "POST":
+
         new_bid = Bid(owner = request.user, auction=auction, amount=request.POST["new-bid"])
         new_bid.save()
         return redirect(view_listing, pk)
@@ -204,3 +212,41 @@ def new_comment(request, pk):
         new_comment = Comment(owner = request.user, auction=auction, contents=request.POST["new_comment"])
         new_comment.save()
         return redirect(view_listing, auction.pk)
+
+def my_watchlist(request):
+
+    watchers = Watchlist.objects.filter(owner=request.user)
+    all_auctions = Auction.objects.all()
+
+    auctions = []
+    for e in watchers:
+        auctions.append(Auction.objects.get(id=e.auction.id), get_bid_data(e.auction.id))
+
+    
+    for auction in auctions:
+        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
+        try:
+            highest_bid = round(highest_bid.amount, 2)
+            auction['highest_bid'] = highest_bid
+        except:
+            auction['highest_bid'] = auction['starting_bid']
+        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+    return render(request, 'auctions/my_watchlist.html', {'auctions': auctions})
+ 
+def add_watchlist(request, pk):
+
+    auction = Auction.objects.get(pk=pk)
+    watcher = Watchlist.objects.filter(owner=request.user, auction=auction.id)
+    if not watcher.exists():
+        aWatchlist = Watchlist(owner = request.user, auction=auction)
+        aWatchlist.save()
+    return redirect(view_listing, pk)
+
+def delete_watchlist(request, pk):
+    # remove from watchlist 
+    auction = Auction.objects.get(pk=pk)
+    watcher = Watchlist.objects.filter(owner=request.user, auction=auction.id)
+    if watcher.exists():
+        watcher.delete()
+
+    return redirect(view_listing, pk)

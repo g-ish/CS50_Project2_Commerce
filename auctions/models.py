@@ -14,7 +14,7 @@ def validate_listing_duration(date):
             params={'value': date},
         )
 class User(AbstractUser):
-    watch_list = models.ManyToManyField('Auction', blank=True, related_name="watchers")
+    # watch_list = models.ManyToManyField('Auction', blank=True, related_name="watchers")
 
     def __str___(self):
         return self.username  
@@ -80,3 +80,6 @@ class Bid(models.Model):
     class Meta:
         ordering = ['amount']
 
+class Watchlist(models.Model):
+    owner = models.ForeignKey('User', on_delete=models.CASCADE)
+    auction = models.ForeignKey('Auction', on_delete=models.CASCADE)
