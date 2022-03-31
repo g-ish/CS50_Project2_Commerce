@@ -18,15 +18,20 @@
 
 
 
-    {% if user.is_owner %}
-        <a href="">Delete Listing</a>
+    {% if owner == True %}
+    <div class="auction-owner-commands">
+        <a href="{% url 'close_listing' action='delete' pk=listing.auction.id %}" style="color: red;">Delete Listing</a><br>
+        <a href="{% url 'close_listing' action='accept' pk=listing.auction.id %}" style="color: green; font-weight: bold; ">
+            Accept highest bid of {{listing.bid_data.highest_bid }} and close listing. 
+        </a>
+    </div>
     {% endif %}
 
     <img src="{{ listing.auction.image_url }}">
 
     <div class="item-description">
-    <h5>Seller's description</h5>
-    <p>{{ listing.auction.item_description }}</p>
+        <h5>Seller's description</h5>
+        <p>{{ listing.auction.item_description }}</p>
     </div class>
 
 </div>
@@ -35,11 +40,10 @@
     <h2>Price: {{ listing.bid_data.highest_bid }}</h2>
     <p>{{ listing.bid_data.bid_count }} bid(s) so far</p>
     <p>
-        Time remaining: {{ listing.bid_data.days_remaining }} days,
-         {{listing.bid_data.hours_remaining }} hours,
-         {{listing.bid_data.minutes_remaining }} minutes remaining. 
+        Time remaining: {{ listing.bid_data.time_remaining }}
     </p>
-    {% if user.is_owner %}
+
+    {% if on_watch == True %}
         
 
     {% else %}
@@ -49,9 +53,9 @@
             
             <label for="new-bid-input" class="form-label">New bid:</label>
             <!-- Add +10%? to min new bid -->
-
-            <p>Minimum new bid: {{listing.bid_data.minimum_bid }} </p>
+            
             <input type="number" id="new-bid-input" class="form-control" name="new-bid" min="{{ listing.bid_data.minimum_bid}}" value="{{ listing.bid_data.minimum_bid}}"> 
+            <p style="font-size: 0.8em; ">Minimum new bid: {{listing.bid_data.minimum_bid }} </p>
             <input type="submit" value="Place new bid" class="btn btn-primary">
         </form>
 
@@ -67,8 +71,8 @@
         <li>Category: {{ listing.auction.item_category }}</li>
         <li>Date listed: {{ listing.auction.creation_date }}</li>
 
-        {% if listing.auction.watch_count > 0 %}
-            <li>{{ listing.auction.watch_count }} watcher(s).</li>
+        {% if watch_count > 0 %}
+            <li>{{ watch_count }} watcher(s).</li>
         {% else %}
             <li>No current watchers</li>
         {% endif %}

@@ -47,12 +47,8 @@ def category_filter(request):
         "auctions" : auctions,
         'categories': categories,
         'category': category})
-    
-
 
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
-    
-
 
 def login_view(request):
     if request.method == "POST":
@@ -183,28 +179,34 @@ def view_listing(request, pk):
         highest_bid = round(highest_bid.amount, 2)
     comments = Comment.objects.all().filter(auction=auction)
 
-    # Creating the 'duration left' fields.
-    time_left = auction.listing_duration - timezone.now()
-    time_left = str(time_left).split(":")
 
-    # 'days' only found in time_left if hours > 24. 
-    if 'days' in time_left[0]:
-        time = time_left[0].split(", ")
-        days = time[0]
-        hours = time[1]
+    if auction.auction_finished == True:
+        time_remaining = "Auction finished!"
     else:
-        days = 0
-        hours= time_left[0]
-    minutes = time_left[1]
+        # Creating the 'time left' fields.
+        # Don't think this is working. 
+        time_left = auction.listing_duration - timezone.now()
+        time_left = str(time_left).split(":")
+
+        print(time_left)
+
+        # 'days' only found in time_left if hours > 24. 
+        if 'days' in time_left[0]:
+            time = time_left[0].split(", ")
+            days = time[0] + ", "
+            hours = time[1]
+        else:
+            days = ""
+            hours= time_left[0]
+        minutes = time_left[1]
+        time_remaining = str(days) + " " + str(hours) + " hours, " + str(minutes) + " minutes remaining."
 
     bid_data = {
         'highest_bid' : highest_bid, 
         # new bid must be 10% above the previous
         'minimum_bid' : round(highest_bid * 0.1 + highest_bid,2),
         'bid_count' : Bid.objects.all().filter(auction=auction).count(),
-        'days_remaining' : days,
-        'hours_remaining': hours,
-        'minutes_remaining': minutes
+        'time_remaining' : time_remaining,
         }
 
     comments = Comment.objects.all().filter(auction=auction)
@@ -222,7 +224,18 @@ def view_listing(request, pk):
                 on_watch = True
             else:
                 on_watch = False
-        return render(request, 'auctions/view_listing.html', {'listing' : listing, 'on_watch': on_watch})
+        watch_count = Watchlist.objects.filter(auction=auction.id).count()
+        # Flag to show special commands (delete, accept bid) to user if owner
+        if auction.owner == request.user:
+            owner = True
+        else:
+            owner = False
+
+        return render(request, 'auctions/view_listing.html', 
+        {'listing' : listing,
+        'on_watch': on_watch,
+        'owner': owner,
+        'watch_count': watch_count})
     elif request.method == "POST":
 
         new_bid = Bid(owner = request.user, auction=auction, amount=request.POST["new-bid"])
@@ -291,3 +304,17 @@ def delete_watchlist(request, pk):
         watcher.delete()
 
     return redirect(view_listing, pk)
+
+@login_required
+def close_listing(request, action, pk):
+    if action == "delete":
+            auction = Auction.objects.get(pk=pk)
+            auction.delete()
+            return redirect(index)
+    elif action == "accept":
+        auction = Auction.objects.get(pk=pk)
+        auction.auction_finished = True
+        auction.save()
+        return redirect(view_listing, pk)
+    else:
+        return redirect(view_listing, pk)
