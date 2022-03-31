@@ -2,11 +2,23 @@
 
 {% block body %}
 
-    <h2>Active Listings</h2>
+    <h2>Choose a category</h2>
 
-    <a href="{% url 'category_filter' %}">Filter by category</a>
+    <div class="index-filters">
+        <form method="POST">
+            {% csrf_token %}
+        <select name="category">
+            {% for category in categories %}
+                <option value="{{ category.0 }}">{{ category.1 }}</option>
+            {% endfor %}
+        </select>
+        <input type='submit' value="Apply Filter">
+    </form>
+    </div>
+
+    {% if auctions|length  %}
+    <h5>Filtering by: {{ category }}</h5>
     
-
     {% for auction in auctions %}
     <a href="{% url 'view_listing' pk=auction.id  %}" class="auction-anchor">
     <div class="auction-item">
@@ -21,5 +33,9 @@
     </div>
     </a>
     {% endfor %}
+    {% else %}
+
+        <h5>No listings under this cateogry</h5>
+    {% endif %}
 
 {% endblock %}

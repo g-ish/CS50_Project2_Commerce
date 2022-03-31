@@ -1,9 +1,2 @@
-
-
-1. Restrict view listing image size + general CSS fixing across all 
-2. Watchlist
-3. Pages on active listings and watchlist? 
-4. Category Filters 
-5. My listings
-6. Past listigns
-
+Add ability to close auction which awards the listing to the highest bidder
+if a user opens a closed listing, and it's one they've won, they should be made aware. 

@@ -1,6 +1,7 @@
 from ast import Pass
 from asyncio.windows_events import NULL
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -12,10 +13,9 @@ from django.utils import timezone
 from datetime import datetime as dt
 
 def index(request):
-    print(Auction.categories)
 
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
-    # attach the highest bid to each auction object
+    # attach the highest bid and bid counts to each auction object
     for auction in auctions:
         highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
         try:
@@ -24,7 +24,34 @@ def index(request):
         except:
             auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
-    return render(request, "auctions/index.html", {"auctions" : auctions})
+    return render(request, "auctions/index.html", {"auctions" : auctions} )
+
+def category_filter(request):
+    categories = Auction.categories
+
+    if request.method == "GET":
+        return render(request, "auctions/category_view.html", {'categories': categories})
+    else:
+        category = request.POST["category"]
+        auctions = Auction.objects.filter(item_category=category).order_by('-creation_date').values()
+        # attach the highest bid to each auction object
+    for auction in auctions:
+        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
+        try:
+            highest_bid = round(highest_bid.amount, 2)
+            auction['highest_bid'] = highest_bid
+        except:
+            auction['highest_bid'] = auction['starting_bid']
+        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+    return render(request, "auctions/category_view.html", {
+        "auctions" : auctions,
+        'categories': categories,
+        'category': category})
+    
+
+
+    auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
+    
 
 
 def login_view(request):
@@ -46,7 +73,7 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
+@login_required
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
@@ -78,6 +105,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+@login_required
 def create_listing(request):
     time = str(timezone.now())
     if request.method == "POST": 
@@ -107,6 +135,8 @@ def create_listing(request):
         form = NewAuction()
         return render(request, 'auctions/create_listing.html', {'form' : form })
 
+
+@login_required
 def view_user_listings(request):
     user = request.user
     auctions = Auction.objects.filter(auction_finished=False, owner=user).order_by('-creation_date').values()
@@ -140,6 +170,7 @@ def view_past_listings(request):
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
     return render(request, "auctions/past_listings.html", {"auctions" : auctions})
 
+
 def view_listing(request, pk):
     auction = Auction.objects.get(pk=pk)
 
@@ -151,9 +182,6 @@ def view_listing(request, pk):
         highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
         highest_bid = round(highest_bid.amount, 2)
     comments = Comment.objects.all().filter(auction=auction)
-
-
-
 
     # Creating the 'duration left' fields.
     time_left = auction.listing_duration - timezone.now()
@@ -168,8 +196,6 @@ def view_listing(request, pk):
         days = 0
         hours= time_left[0]
     minutes = time_left[1]
-
-
 
     bid_data = {
         'highest_bid' : highest_bid, 
@@ -203,6 +229,7 @@ def view_listing(request, pk):
         new_bid.save()
         return redirect(view_listing, pk)
 
+@login_required
 def new_comment(request, pk):
     auction = Auction.objects.get(pk=pk)
 
@@ -214,6 +241,7 @@ def new_comment(request, pk):
         new_comment.save()
         return redirect(view_listing, auction.pk)
 
+@login_required
 def my_watchlist(request):
 
     watchers = Watchlist.objects.filter(owner=request.user)
@@ -244,6 +272,7 @@ def my_watchlist(request):
             
     return render(request, 'auctions/my_watchlist.html', {'auctions': auctions})
  
+@login_required
 def add_watchlist(request, pk):
 
     auction = Auction.objects.get(pk=pk)
@@ -253,6 +282,7 @@ def add_watchlist(request, pk):
         aWatchlist.save()
     return redirect(view_listing, pk)
 
+@login_required
 def delete_watchlist(request, pk):
     # remove from watchlist 
     auction = Auction.objects.get(pk=pk)
