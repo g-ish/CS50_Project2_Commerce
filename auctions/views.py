@@ -125,6 +125,7 @@ def view_user_listings(request):
 
 
 
+
 def view_past_listings(request):
     auctions = Auction.objects.filter(auction_finished=True).order_by('-creation_date').values()
 
@@ -218,19 +219,29 @@ def my_watchlist(request):
     watchers = Watchlist.objects.filter(owner=request.user)
     all_auctions = Auction.objects.all()
 
+    # Get the highest bid and bid counts for each auction.
+    def get_bid_data(auction_id):
+        try:
+            bid_data = Bid.objects.filter(auction=auction_id).order_by('-amount').first()
+            highest_bid = bid_data.amount
+        except: 
+            bid_data = Auction.objects.get(id=e.auction.id)
+            highest_bid = bid_data.starting_bid
+        return {'highest_bid': round(highest_bid, 2), 'bid_count' : Bid.objects.all().filter(auction=auction_id).count()}
+
+    # For each auction in the users watchlist, get the basic details 
+    # to populate the watchlist. 
     auctions = []
     for e in watchers:
-        auctions.append(Auction.objects.get(id=e.auction.id), get_bid_data(e.auction.id))
-
-    
-    for auction in auctions:
-        highest_bid = Bid.objects.filter(auction=auction['id']).order_by('-amount').first()
-        try:
-            highest_bid = round(highest_bid.amount, 2)
-            auction['highest_bid'] = highest_bid
-        except:
-            auction['highest_bid'] = auction['starting_bid']
-        auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
+        bid_data = get_bid_data(e.auction.id)
+        auction = Auction.objects.get(id=e.auction.id)
+        auctions.append({
+            'id': auction.id,
+            'image_url': auction.image_url,
+            'item_title': auction.item_title,
+            'highest_bid': bid_data['highest_bid'],
+            'bid_count': bid_data['bid_count']})
+            
     return render(request, 'auctions/my_watchlist.html', {'auctions': auctions})
  
 def add_watchlist(request, pk):
