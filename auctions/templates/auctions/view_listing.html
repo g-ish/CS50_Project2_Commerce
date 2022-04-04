@@ -16,6 +16,15 @@
 {% endif %}
 </div>
 
+    {% if status == 'won' %}
+    <div class="alert alert-success">
+        <strong>Success!</strong> You won this listing.
+    </div>
+    {% else %}
+    <div class="alert alert-danger">
+        <strong>Sorry!</strong> {{ message }}
+      </div>
+    {% endif %}
 
 
     {% if owner == True %}
