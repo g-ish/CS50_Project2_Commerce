@@ -32,7 +32,7 @@ class NewAuction(forms.Form):
     starting_bid = forms.FloatField(min_value=0.00)
 
     # this is causing an eror, date works okay but datetime doesnt bring up the calendar. 
-    listing_duration = forms.DateTimeField(widget=forms.DateTimeInput(attrs={
+    expiry_date = forms.DateTimeField(widget=forms.DateTimeInput(attrs={
         'class':'datepicker', 
         'type': 'datetime-local',
         'value': html_time,

@@ -1,68 +1,72 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 
-def validate_listing_duration(date):
 
-    
+def validate_listing_duration(date):
     if date - timedelta(hours=1) < timezone.now():
-            raise ValidationError(('Date cannot be in the past.'),
-            params={'value': date},
-        )
+        raise ValidationError(('Date cannot be in the past.'),
+                              params={'value': date},
+                              )
+
+
 class User(AbstractUser):
     # watch_list = models.ManyToManyField('Auction', blank=True, related_name="watchers")
 
-    def __str___(self):
-        return self.username  
+    auctions_won = models.ForeignKey('Auction', on_delete=models.CASCADE, related_name="auctions_won", null=True)
 
-# Todo: convert listing duration into a float field that represents hours (maybe a drop down list i.e 1 day, 2 days, 1 week etc?)
-# Then use JS to dynamically show end date based on their input 
+    def __str___(self):
+        return self.username
+
+
+
+# Then use JS to dynamically show end date based on their input
 class Auction(models.Model):
     FURNITURE = "Furniture"
     ELECTRONICS = "Electronics"
     SPORTS_EQUIPMENT = "Sports Equipment"
     AUTOMOBILES = "Automobiles"
     OTHER = "Other"
-    
+
     categories = [
-    (FURNITURE, 'Furniture'),
-    (ELECTRONICS, 'Electronics'),
-    (SPORTS_EQUIPMENT, 'Sports Equipment'),
-    (AUTOMOBILES, 'Automobiles'),
-    (OTHER, 'Other'),
+        (FURNITURE, 'Furniture'),
+        (ELECTRONICS, 'Electronics'),
+        (SPORTS_EQUIPMENT, 'Sports Equipment'),
+        (AUTOMOBILES, 'Automobiles'),
+        (OTHER, 'Other'),
     ]
 
-    
-    owner = models.ForeignKey('User',  on_delete=models.CASCADE, related_name="listings")
+    owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="listings")
     item_title = models.CharField(max_length=64)
     starting_bid = models.FloatField()
     item_description = models.CharField(max_length=900)
     item_category = models.CharField(choices=categories, max_length=64)
     creation_date = models.DateTimeField(auto_now_add=True)
-    listing_duration = models.DateTimeField(
-        validators=[validate_listing_duration], 
+    expiry_date = models.DateTimeField(
+        validators=[validate_listing_duration],
         help_text="Cannot be in the past."
-        )
- 
+    )
+
     ended_date = models.DateTimeField(blank=True, null=True)
     auction_finished = models.BooleanField(default=False)
     image_url = models.URLField(blank=True)
+
     class Meta:
         ordering = ['-creation_date']
 
     def __str___(self):
-        return self.pk  
+        return self.pk
 
 
-class Comment(models.Model): 
+class Comment(models.Model):
     owner = models.ForeignKey('User', on_delete=models.CASCADE, related_name="comments")
     auction = models.ForeignKey('Auction', on_delete=models.CASCADE)
-    contents =  models.TextField(max_length=500)
+    contents = models.TextField(max_length=500)
     posted_date = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         ordering = ['posted_date']
 
@@ -71,14 +75,16 @@ class Comment(models.Model):
 
     def get_username(self):
         return self.owner.username
-        
+
 
 class Bid(models.Model):
     owner = models.ForeignKey('User', on_delete=models.CASCADE)
     auction = models.ForeignKey('Auction', on_delete=models.CASCADE)
     amount = models.FloatField()
+
     class Meta:
         ordering = ['amount']
+
 
 class Watchlist(models.Model):
     owner = models.ForeignKey('User', on_delete=models.CASCADE)

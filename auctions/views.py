@@ -12,8 +12,8 @@ from .forms import NewAuction, NewComment
 from django.utils import timezone
 from datetime import datetime as dt
 
-def index(request):
 
+def index(request):
     auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
     # attach the highest bid and bid counts to each auction object
     for auction in auctions:
@@ -24,7 +24,8 @@ def index(request):
         except:
             auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
-    return render(request, "auctions/index.html", {"auctions" : auctions} )
+    return render(request, "auctions/index.html", {"auctions": auctions})
+
 
 def category_filter(request):
     categories = Auction.categories
@@ -44,11 +45,10 @@ def category_filter(request):
             auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
     return render(request, "auctions/category_view.html", {
-        "auctions" : auctions,
+        "auctions": auctions,
         'categories': categories,
         'category': category})
 
-    auctions = Auction.objects.filter(auction_finished=False).order_by('-creation_date').values()
 
 def login_view(request):
     if request.method == "POST":
@@ -68,6 +68,7 @@ def login_view(request):
             })
     else:
         return render(request, "auctions/login.html")
+
 
 @login_required
 def logout_view(request):
@@ -89,47 +90,46 @@ def register(request):
             })
 
         # Attempt to create new user
-        try:
-            user = User.objects.create_user(username, email, password)
-            user.save()
-        except IntegrityError:
-            return render(request, "auctions/register.html", {
-                "message": "Username already taken."
-            })
+        # try:
+        user = User.objects.create_user(username, email, password)
+        user.save()
+
+        # except IntegrityError:
+        #     print(IntegrityError)
+        #     return render(request, "auctions/register.html", {
+        #         "message": "Username already taken."
+        #     })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
 
+
 @login_required
 def create_listing(request):
-    time = str(timezone.now())
-    if request.method == "POST": 
+    if request.method == "POST":
         form = NewAuction(request.POST)
 
         # if form.is_valid():
-            # Save the form into DB and use the PK to show the auction
+        # Save the form into DB and use the PK to show the auction
         owner = request.user
         item_title = request.POST["item_title"]
         item_description = request.POST["item_description"]
         item_category = request.POST["item_category"]
         starting_bid = request.POST["starting_bid"]
         image_url = request.POST["image_url"]
-        listing_duration = request.POST['listing_duration']
-
+        expiry_date = request.POST['expiry_date']
 
         new_auction = Auction(owner=owner, item_title=item_title, starting_bid=starting_bid,
-            item_description=item_description, item_category=item_category, listing_duration=listing_duration, image_url=image_url)
+                              item_description=item_description, item_category=item_category, expiry_date=expiry_date,
+                              image_url=image_url)
         new_auction.save()
-        
         return redirect(view_listing, new_auction.pk)
-        
         # else:
         #     print('form invalid')
-
     else:
         form = NewAuction()
-        return render(request, 'auctions/create_listing.html', {'form' : form })
+        return render(request, 'auctions/create_listing.html', {'form': form})
 
 
 @login_required
@@ -146,10 +146,7 @@ def view_user_listings(request):
         except:
             auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
-    return render(request, "auctions/my_listings.html", {"auctions" : auctions})
-
-
-
+    return render(request, "auctions/my_listings.html", {"auctions": auctions})
 
 
 def view_past_listings(request):
@@ -164,83 +161,21 @@ def view_past_listings(request):
         except:
             auction['highest_bid'] = auction['starting_bid']
         auction['bid_count'] = Bid.objects.all().filter(auction=auction['id']).count()
-    return render(request, "auctions/past_listings.html", {"auctions" : auctions})
+    return render(request, "auctions/past_listings.html", {"auctions": auctions})
 
 
 def view_listing(request, pk):
-    auction = Auction.objects.get(pk=pk)
+    auction = get_auction(pk, request.user)
 
-    comments = Comment.objects.all().filter(auction=auction).values()
-    bids = Bid.objects.all().filter(auction=auction)
-    if not bids.exists():
-        highest_bid = auction.starting_bid
-    else:
-        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
-        highest_bid = round(highest_bid.amount, 2)
-    comments = Comment.objects.all().filter(auction=auction)
-
-
-    if auction.auction_finished == True:
-        time_remaining = "Auction finished!"
-    else:
-        # Creating the 'time left' fields.
-        # Don't think this is working. 
-        time_left = auction.listing_duration - timezone.now()
-        time_left = str(time_left).split(":")
-
-        print(time_left)
-
-        # 'days' only found in time_left if hours > 24. 
-        if 'days' in time_left[0]:
-            time = time_left[0].split(", ")
-            days = time[0] + ", "
-            hours = time[1]
-        else:
-            days = ""
-            hours= time_left[0]
-        minutes = time_left[1]
-        time_remaining = str(days) + " " + str(hours) + " hours, " + str(minutes) + " minutes remaining."
-
-    bid_data = {
-        'highest_bid' : highest_bid, 
-        # new bid must be 10% above the previous
-        'minimum_bid' : round(highest_bid * 0.1 + highest_bid,2),
-        'bid_count' : Bid.objects.all().filter(auction=auction).count(),
-        'time_remaining' : time_remaining,
-        }
-
-    comments = Comment.objects.all().filter(auction=auction)
-    listing = {
-        'auction_pk' : auction.pk,
-        'auction' : auction,
-        'bid_data' : bid_data,
-        'comments' : comments,
-        }
     if request.method == "GET":
-        watchers = Watchlist.objects.filter(owner=request.user, auction=auction.id)
-        on_watch = False
-        for watcher in watchers: 
-            if watcher.owner.get_username() == request.user.get_username():
-                on_watch = True
-            else:
-                on_watch = False
-        watch_count = Watchlist.objects.filter(auction=auction.id).count()
-        # Flag to show special commands (delete, accept bid) to user if owner
-        if auction.owner == request.user:
-            owner = True
-        else:
-            owner = False
-
-        return render(request, 'auctions/view_listing.html', 
-        {'listing' : listing,
-        'on_watch': on_watch,
-        'owner': owner,
-        'watch_count': watch_count})
+        return render(request, 'auctions/view_listing.html',
+                      {'listing' : auction})
     elif request.method == "POST":
-
-        new_bid = Bid(owner = request.user, auction=auction, amount=request.POST["new-bid"])
+        auction = Auction.objects.get(pk=pk)
+        new_bid = Bid(owner=request.user, auction=auction, amount=request.POST["new-bid"])
         new_bid.save()
         return redirect(view_listing, pk)
+
 
 @login_required
 def new_comment(request, pk):
@@ -248,27 +183,27 @@ def new_comment(request, pk):
 
     form = NewComment()
     if request.method == "GET":
-        return render(request, 'auctions/new_comment.html', {'form' : form})
+        return render(request, 'auctions/new_comment.html', {'form': form})
     else:
-        new_comment = Comment(owner = request.user, auction=auction, contents=request.POST["new_comment"])
+        new_comment = Comment(owner=request.user, auction=auction, contents=request.POST["new_comment"])
         new_comment.save()
         return redirect(view_listing, auction.pk)
 
+
 @login_required
 def my_watchlist(request):
-
     watchers = Watchlist.objects.filter(owner=request.user)
-    all_auctions = Auction.objects.all()
+    # all_auctions = Auction.objects.all()
 
     # Get the highest bid and bid counts for each auction.
     def get_bid_data(auction_id):
         try:
             bid_data = Bid.objects.filter(auction=auction_id).order_by('-amount').first()
             highest_bid = bid_data.amount
-        except: 
+        except:
             bid_data = Auction.objects.get(id=e.auction.id)
             highest_bid = bid_data.starting_bid
-        return {'highest_bid': round(highest_bid, 2), 'bid_count' : Bid.objects.all().filter(auction=auction_id).count()}
+        return {'highest_bid': round(highest_bid, 2), 'bid_count': Bid.objects.all().filter(auction=auction_id).count()}
 
     # For each auction in the users watchlist, get the basic details 
     # to populate the watchlist. 
@@ -282,18 +217,19 @@ def my_watchlist(request):
             'item_title': auction.item_title,
             'highest_bid': bid_data['highest_bid'],
             'bid_count': bid_data['bid_count']})
-            
+
     return render(request, 'auctions/my_watchlist.html', {'auctions': auctions})
- 
+
+
 @login_required
 def add_watchlist(request, pk):
-
     auction = Auction.objects.get(pk=pk)
     watcher = Watchlist.objects.filter(owner=request.user, auction=auction.id)
     if not watcher.exists():
-        aWatchlist = Watchlist(owner = request.user, auction=auction)
+        aWatchlist = Watchlist(owner=request.user, auction=auction)
         aWatchlist.save()
     return redirect(view_listing, pk)
+
 
 @login_required
 def delete_watchlist(request, pk):
@@ -305,12 +241,13 @@ def delete_watchlist(request, pk):
 
     return redirect(view_listing, pk)
 
+
 @login_required
 def close_listing(request, action, pk):
     if action == "delete":
-            auction = Auction.objects.get(pk=pk)
-            auction.delete()
-            return redirect(index)
+        auction = Auction.objects.get(pk=pk)
+        auction.delete()
+        return redirect(index)
     elif action == "accept":
         auction = Auction.objects.get(pk=pk)
         auction.auction_finished = True
@@ -318,3 +255,79 @@ def close_listing(request, action, pk):
         return redirect(view_listing, pk)
     else:
         return redirect(view_listing, pk)
+
+    # Todo: Stop user from creating a listing in the past? Do from within the create listing page?
+
+
+def get_auction(pk, user):
+    auction = Auction.objects.get(pk=pk)
+    comments = Comment.objects.all().filter(auction=auction)
+    bids = Bid.objects.all().filter(auction=auction)
+
+    # Get the highest bid, if no highest bid then assign starting bid
+    if not bids.exists():
+        highest_bid = auction.starting_bid
+    else:
+        highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
+        highest_bid_amount = round(highest_bid.amount, 2)
+
+    # If auction is not finished but time expired then set as finished.
+    if auction.expiry_date < timezone.now() and not auction.auction_finished:
+        auction.auction_finished = True
+        auction.save()
+
+    if auction.auction_finished:
+        time_remaining = "Auction finished!"
+        if user == highest_bid.owner:
+            status = 'won'
+        else:
+            status = 'lost'
+    else:
+        status = 'active'
+        time_left = auction.expiry_date - timezone.now()
+        # converting the difference to a 'x days, y hours, z minutes format.
+        time_left = str(time_left).split(":")
+        if 'days' in time_left[0]:
+            time = time_left[0].split(", ")
+            days = time[0] + ", "
+            hours = time[1]
+        else:
+            days = ""
+            hours = time_left[0]
+        minutes = time_left[1]
+        time_remaining = str(days) + " " + str(hours) + " hours, " + str(minutes) + " minutes remaining."
+
+    watchers = Watchlist.objects.filter(auction=auction.id)
+    on_watch = False
+    for watcher in watchers:
+        if watcher.owner.get_username() == user.get_username():
+            on_watch = True
+        else:
+            on_watch = False
+    watch_count = Watchlist.objects.filter(auction=auction.id).count()
+
+    # Flag to show special commands (delete, accept bid) to user if owner
+    if auction.owner == user:
+        owner = True
+    else:
+        owner = False
+
+    bid_data = {
+        'highest_bid': highest_bid,
+        # new bid must be 10% higher than previous bid
+        'minimum_bid': round(highest_bid_amount * 0.1 + highest_bid_amount,2),
+        'bid_count': Bid.objects.all().filter(auction=auction).count(),
+        'time_remaining': time_remaining,
+    }
+
+    listing = {
+        'auction': auction,
+        'auction_pk': auction.pk,
+        'bid_data': bid_data,
+        'comments': comments,
+        'owner': owner,
+        'on_watch': on_watch,
+        'watch_count': watch_count,
+        'status': status,
+    }
+    return listing
