@@ -271,6 +271,8 @@ def get_auction(pk, user):
         highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
         highest_bid_amount = round(highest_bid.amount, 2)
 
+
+
     # If auction is not finished but time expired then set as finished.
     if auction.expiry_date < timezone.now() and not auction.auction_finished:
         auction.auction_finished = True

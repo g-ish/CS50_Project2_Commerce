@@ -7,24 +7,22 @@
     <div class="listing-area">
 
         <div class="listing-title">
-            {% if on_watch == True %}
+            {% if listing.on_watch == True %}
                 <h1>{{ listing.auction.item_title }}</h1>
                 <a href="{% url 'delete_watchlist' pk=listing.auction.id %}">Delete from watchlist</a>
             {% else %}
-
                 <h1>{{ listing.auction.item_title }}</h1>
                 <a href="{% url 'add_watchlist' pk=listing.auction.id %}">Add to watchlist</a>
             {% endif %}
         </div>
-
-        {% if status == 'won' %}
+        {% if listing.status == 'won' %}
             <div class="alert alert-success">
                 <strong>Success!</strong> You won this listing.
             </div>
-        {% else %}
-            {#    <div class="alert alert-danger">#}
-            {#        <strong>You lost!</strong> <!-- Todo: send this in backend! -->#}
-            {#      </div>#}
+        {% elif listing.status == 'lost' %}
+                <div class="alert alert-danger">
+                    <strong>You lost!</strong>
+                  </div>
         {% endif %}
 
         <!-- todo: if auction = finished then change wording -->
@@ -49,17 +47,14 @@
     </div>
 
     <div class="bid-area">
-        {% if status == 'won' %}
-            <h4>Winning bid: {{ listing.bid_data.highest_bid }}</h4>
+        {% if listing.status != 'active' %}
+            <h4>Winning bid: {{ listing.bid_data.highest_bid.amount }}</h4>
 
-{#        <! -- todo: if status = 'lost' then show user -->    #}
-        {% else %}
-            <h4>{{ listing.auction_finished }}</h4>
+        {%  else %}
+
             <h2>Current highest bid: {{ listing.bid_data.highest_bid.amount }}</h2>
-            <p>{{ listing.bid_data.bid_count }} bid(s) so far</p>
-            <p>
-                Time remaining: {{ listing.bid_data.time_remaining }}
-            </p>
+            <p> {{ listing.bid_data.bid_count }} bid(s) so far</p>
+            <p> Time remaining: {{ listing.bid_data.time_remaining }} </p>
             {% if user.is_authenticated %}
                 <form name="new-bid" class="new-bid-form" method="POST" class="mb-3">
                     {% csrf_token %}
@@ -69,21 +64,20 @@
                            min="{{ listing.bid_data.minimum_bid }}" value="{{ listing.bid_data.minimum_bid }}"
                            step="any">
                     <p style="font-size: 0.8em; ">Minimum new bid: {{ listing.bid_data.minimum_bid }} </p>
-                    <input type="submit" value="Place new bid" class="btn btn-primary">
+                    <input type="submit" value="Place new bid" class="btn btn-primary" >
                 </form>
             {% else %}
-                <label for="new-bid-input" class="form-label">New bid:</label>
+                <label for="new-bid-input" class="form-label">New bid: </label>
                 <input type="number" id="new-bid-input" class="form-control" name="new-bid"
                        min="{{ listing.bid_data.minimum_bid }}" value="{{ listing.bid_data.minimum_bid }}" step="any"
-                       disabled="true">
-                <p style="font-size: 0.8em; ">Minimum new bid: {{ listing.bid_data.minimum_bid }} </p>
+                       disabled="true" >
+                <p style="font-size: 0.8em;"> Minimum new bid: {{ listing.bid_data.minimum_bid }} </p>
 
-                <a href="{% url 'login' %}">You must login to place a bid.</a>
+                <a href="{% url 'login' %}"> You must login to place a bid. </a>
             {% endif %}
         {% endif %}
 
     </div>
-
 
     <div class="listing-stats">
         <ul>
@@ -99,8 +93,6 @@
         </ul>
     </div>
 
-    {{ listing.test }}
-
     <h4>Comments {{ listing.comments.count }}</h4>
     {% if listing.comments %}
         {% for comment in listing.comments %}
@@ -113,5 +105,5 @@
     {% if user.is_authenticated %}
         <a href="{% url 'new_comment' listing.auction_pk %}" class="btn btn-primary comment-form">Submit new comment</a>
     {% endif %}
-
+    </div>
 {% endblock %}

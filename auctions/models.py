@@ -8,7 +8,7 @@ from datetime import timedelta
 
 def validate_listing_duration(date):
     if date - timedelta(hours=1) < timezone.now():
-        raise ValidationError(('Date cannot be in the past.'),
+        raise ValidationError('Date cannot be in the past.',
                               params={'value': date},
                               )
 
