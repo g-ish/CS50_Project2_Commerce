@@ -267,6 +267,7 @@ def get_auction(pk, user):
     # Get the highest bid, if no highest bid then assign starting bid
     if not bids.exists():
         highest_bid = auction.starting_bid
+        highest_bid_amount = highest_bid
     else:
         highest_bid = Bid.objects.filter(auction=auction).order_by('-amount').first()
         highest_bid_amount = round(highest_bid.amount, 2)

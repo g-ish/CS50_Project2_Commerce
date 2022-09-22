@@ -14,6 +14,10 @@
                 <h1>{{ listing.auction.item_title }}</h1>
                 <a href="{% url 'add_watchlist' pk=listing.auction.id %}">Add to watchlist</a>
             {% endif %}
+
+            {% if listing.owner == True %}
+
+            {% endif %}
         </div>
         {% if listing.status == 'won' %}
             <div class="alert alert-success">
@@ -22,11 +26,10 @@
         {% elif listing.status == 'lost' %}
                 <div class="alert alert-danger">
                     <strong>You lost!</strong>
-                  </div>
+                </div>
         {% endif %}
 
-        <!-- todo: if auction = finished then change wording -->
-        {% if owner == True %}
+        {% if listing.owner == True %}
             <div class="auction-owner-commands">
                 <a href="{% url 'close_listing' action='delete' pk=listing.auction.id %}" style="color: red;">Delete
                     Listing</a><br>
@@ -52,7 +55,7 @@
 
         {%  else %}
 
-            <h2>Current highest bid: {{ listing.bid_data.highest_bid.amount }}</h2>
+            <h2>Current highest bid: {{ listing.bid_data.highest_bid }}</h2>
             <p> {{ listing.bid_data.bid_count }} bid(s) so far</p>
             <p> Time remaining: {{ listing.bid_data.time_remaining }} </p>
             {% if user.is_authenticated %}
