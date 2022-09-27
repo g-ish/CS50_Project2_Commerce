@@ -23,19 +23,28 @@
             <div class="alert alert-success">
                 <strong>Success!</strong> You won this listing.
             </div>
-        {% elif listing.status == 'lost' %}
-                <div class="alert alert-danger">
-                    <strong>You lost!</strong>
+        {% elif listing.status == 'ended' %}
+                <div class="alert alert-warning">
+                    <strong>This listing has ended</strong>
                 </div>
+        {% elif listing.status == 'expired' %}
+            <div class="alert alert-danger">
+                    <strong>This listing has expired.</strong>
+                </div>
+            {% elif listing.status == 'finished' %}
+                        <div class="alert alert-success">
+                    <strong>Auction finished, time to contact the buyer!.</strong>
+                </div>
+
         {% endif %}
 
-        {% if listing.owner == True %}
+        {% if listing.owner == True and listing.status == "active" %}
             <div class="auction-owner-commands">
                 <a href="{% url 'close_listing' action='delete' pk=listing.auction.id %}" style="color: red;">Delete
                     Listing</a><br>
                 <a href="{% url 'close_listing' action='accept' pk=listing.auction.id %}"
                    style="color: green; font-weight: bold; ">
-                    Accept highest bid of {{ listing.bid_data.highest_bid }} and close listing.
+                    Accept highest bid of {{ listing.bid_data.highest_bid.amount }} and close listing.
                 </a>
             </div>
         {% endif %}
@@ -55,7 +64,7 @@
 
         {%  else %}
 
-            <h2>Current highest bid: {{ listing.bid_data.highest_bid }}</h2>
+            <h2>Current highest bid: {{ listing.bid_data.highest_bid.amount }}</h2>
             <p> {{ listing.bid_data.bid_count }} bid(s) so far</p>
             <p> Time remaining: {{ listing.bid_data.time_remaining }} </p>
             {% if user.is_authenticated %}

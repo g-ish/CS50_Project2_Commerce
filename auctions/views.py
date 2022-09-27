@@ -280,11 +280,16 @@ def get_auction(pk, user):
         auction.save()
 
     if auction.auction_finished:
-        time_remaining = "Auction finished!"
-        if user == highest_bid.owner:
-            status = 'won'
+        time_remaining = "Ended."
+        if not bids:
+            status = "ended"
+        if bids and highest_bid.owner == user:
+            status = "won" #let bid owner know there's a winner
+        elif bids and auction.owner == user:
+            status = "finished" #let auction owner know there's a winner
         else:
-            status = 'lost'
+            status = "ended"
+
     else:
         status = 'active'
         time_left = auction.expiry_date - timezone.now()
