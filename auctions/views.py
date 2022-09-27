@@ -132,10 +132,11 @@ def create_listing(request):
         return render(request, 'auctions/create_listing.html', {'form': form})
 
 
+# view the listings owned by logged in user
 @login_required
 def view_user_listings(request):
     user = request.user
-    auctions = Auction.objects.filter(auction_finished=False, owner=user).order_by('-creation_date').values()
+    auctions = Auction.objects.filter(owner=user).order_by('-creation_date').values()
 
     # attach the highest bid to each auction object
     for auction in auctions:

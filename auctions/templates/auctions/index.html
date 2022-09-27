@@ -6,7 +6,7 @@
 
     <a href="{% url 'category_filter' %}">Filter by category</a>
     
-
+    {% if auctions|length  %}
     {% for auction in auctions %}
     <a href="{% url 'view_listing' pk=auction.id  %}" class="auction-anchor">
     <div class="auction-item">
@@ -21,5 +21,8 @@
     </div>
     </a>
     {% endfor %}
+    {% else %}
+    <p> No active auctions. <a href="{% url 'create_listing' %}">Create one now. </a></p>
+    {% endif %}
 
 {% endblock %}
