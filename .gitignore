@@ -194,3 +194,16 @@ auctions/migrations/__pycache__/0013_remove_auction_image.cpython-39.pyc
 auctions/migrations/__pycache__/0014_alter_auctionphotos_auction.cpython-39.pyc
 auctions/migrations/__pycache__/0002_auction_comment_bid_user_watch_list.cpython-39.pyc
 auctions/migrations/0031_remove_user_watch_list_watchlist.py
+auctions/migrations/__pycache__/0002_auction_comment_bid_user_watch_list.cpython-39.pyc
+auctions/migrations/__pycache__/0003_remove_auction_bidders.cpython-39.pyc
+auctions/migrations/__pycache__/0004_alter_comment_posteddate.cpython-39.pyc
+auctions/migrations/__pycache__/0005_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0006_alter_auction_auction_finished_and_more.cpython-39.pyc
+auctions/migrations/__pycache__/0007_alter_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0008_auctionphotos_alter_auction_photo.cpython-39.pyc
+auctions/migrations/__pycache__/0009_remove_auction_photo_remove_auctionphotos_photo_and_more.cpython-39.pyc
+auctions/migrations/__pycache__/0010_alter_auction_item_description.cpython-39.pyc
+auctions/migrations/__pycache__/0011_auction_starting_bid.cpython-39.pyc
+auctions/migrations/__pycache__/0012_auction_item_title_alter_auction_starting_bid.cpython-39.pyc
+auctions/migrations/__pycache__/0013_remove_auction_image.cpython-39.pyc
+auctions/migrations/__pycache__/0014_alter_auctionphotos_auction.cpython-39.pyc

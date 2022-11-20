@@ -5,7 +5,9 @@
     <h2>My Listings</h2>
     
     {% if auctions|length  %}
+
     {% for auction in auctions %}
+
     <a href="{% url 'view_listing' pk=auction.id  %}" class="auction-anchor">
         <div class="auction-item">
             <div class="auction-item-photo-container">
@@ -15,6 +17,12 @@
                 <h4>{{ auction.item_title }}</h4>
                 <h5>Price: £ <span>{{ auction.highest_bid}}</span></h5>
                 <h5>Bids: {{ auction.bid_count }}</h5>
+                {% if auction.auction_finshed == true %}
+                    <h5>Status: Finished </h5>
+                {%  else %}
+                    <h5>Status: Active </h5>
+
+                {% endif %}
             </div>
         </div>
     </a>

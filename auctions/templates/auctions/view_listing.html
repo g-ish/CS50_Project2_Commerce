@@ -2,105 +2,120 @@
 
 {% block body %}
 
-<div class="container">
+    <div class="container">
 
+    <div class="listing-area">
 
-<div class="listing-area">
-    
-<div class="listing-title">
-{% if on_watch == True %}
-    <h1>{{ listing.auction.item_title }}</h1><a href="{% url 'delete_watchlist' pk=listing.auction.id %}">Delete from watchlist</a>
-{% else %}
+        <div class="listing-title">
+            {% if listing.on_watch == True %}
+                <h1>{{ listing.auction.item_title }}</h1>
+                <a href="{% url 'delete_watchlist' pk=listing.auction.id %}">Delete from watchlist</a>
+            {% else %}
+                <h1>{{ listing.auction.item_title }}</h1>
+                <a href="{% url 'add_watchlist' pk=listing.auction.id %}">Add to watchlist</a>
+            {% endif %}
 
-    <h1>{{ listing.auction.item_title }}</h1><a href="{% url 'add_watchlist' pk=listing.auction.id %}">Add to watchlist</a>
-{% endif %}
-</div>
+            {% if listing.owner == True %}
 
-    {% if status == 'won' %}
-    <div class="alert alert-success">
-        <strong>Success!</strong> You won this listing.
-    </div>
-    {% else %}
-    <div class="alert alert-danger">
-        <strong>Sorry!</strong> {{ message }}
-      </div>
-    {% endif %}
-
-
-    {% if owner == True %}
-    <div class="auction-owner-commands">
-        <a href="{% url 'close_listing' action='delete' pk=listing.auction.id %}" style="color: red;">Delete Listing</a><br>
-        <a href="{% url 'close_listing' action='accept' pk=listing.auction.id %}" style="color: green; font-weight: bold; ">
-            Accept highest bid of {{listing.bid_data.highest_bid }} and close listing. 
-        </a>
-    </div>
-    {% endif %}
-
-    <img src="{{ listing.auction.image_url }}">
-
-    <div class="item-description">
-        <h5>Seller's description</h5>
-        <p>{{ listing.auction.item_description }}</p>
-    </div class>
-
-</div>
-
-<div class="bid-area">
-    <h2>Price: {{ listing.bid_data.highest_bid }}</h2>
-    <p>{{ listing.bid_data.bid_count }} bid(s) so far</p>
-    <p>
-        Time remaining: {{ listing.bid_data.time_remaining }}
-    </p>
-
-    {% if on_watch == True %}
-        
-
-    {% else %}
-
-        <form name="new-bid" class="new-bid-form" method="POST" class="mb-3">
-            {% csrf_token %}
-            
-            <label for="new-bid-input" class="form-label">New bid:</label>
-            <!-- Add +10%? to min new bid -->
-            
-            <input type="number" id="new-bid-input" class="form-control" name="new-bid" min="{{ listing.bid_data.minimum_bid}}" value="{{ listing.bid_data.minimum_bid}}"> 
-            <p style="font-size: 0.8em; ">Minimum new bid: {{listing.bid_data.minimum_bid }} </p>
-            <input type="submit" value="Place new bid" class="btn btn-primary">
-        </form>
-
-
-
-
-</div>   
-    {% endif %}
-    
-<div class="listing-stats">
-    <ul>
-        <li>Listed by: {{ listing.auction.owner }}</li>
-        <li>Category: {{ listing.auction.item_category }}</li>
-        <li>Date listed: {{ listing.auction.creation_date }}</li>
-
-        {% if watch_count > 0 %}
-            <li>{{ watch_count }} watcher(s).</li>
-        {% else %}
-            <li>No current watchers</li>
-        {% endif %}
-    </ul>
-</div>
-
-{{listing.test}}
-
-<h4>Comments {{listing.comments.count }}</h4>
-{% if listing.comments %}
-    {% for comment in listing.comments %}
-        <div class="comment border rounded">
-            <div class="comment comment-header">{{comment.get_username}} - {{comment.posted_date}}</div>
-            <div class="comment comment-body">{{comment.contents}}</div>
+            {% endif %}
         </div>
-    {% endfor %}
-{% endif %}
+        {% if listing.status == 'won' %}
+            <div class="alert alert-success">
+                <strong>Success!</strong> You won this listing.
+            </div>
+        {% elif listing.status == 'ended' %}
+                <div class="alert alert-warning">
+                    <strong>This listing has ended</strong>
+                </div>
+        {% elif listing.status == 'expired' %}
+            <div class="alert alert-danger">
+                    <strong>This listing has expired.</strong>
+                </div>
+            {% elif listing.status == 'finished' %}
+                        <div class="alert alert-success">
+                    <strong>Auction finished, time to contact the buyer!.</strong>
+                </div>
+
+        {% endif %}
+
+        {% if listing.owner == True and listing.status == "active" %}
+            <div class="auction-owner-commands">
+                <a href="{% url 'close_listing' action='delete' pk=listing.auction.id %}" style="color: red;">Delete
+                    Listing</a><br>
+                <a href="{% url 'close_listing' action='accept' pk=listing.auction.id %}"
+                   style="color: green; font-weight: bold; ">
+                    Accept highest bid of {{ listing.bid_data.highest_bid.amount }} and close listing.
+                </a>
+            </div>
+        {% endif %}
+
+        <img src="{{ listing.auction.image_url }}">
+
+        <div class="item-description">
+            <h5>Seller's description</h5>
+            <p>{{ listing.auction.item_description }}</p>
+        </div>
+
+    </div>
+
+    <div class="bid-area">
+        {% if listing.status != 'active' %}
+            <h4>Winning bid: {{ listing.bid_data.highest_bid.amount }}</h4>
+
+        {%  else %}
+
+            <h2>Current highest bid: {{ listing.bid_data.highest_bid.amount }}</h2>
+            <p> {{ listing.bid_data.bid_count }} bid(s) so far</p>
+            <p> Time remaining: {{ listing.bid_data.time_remaining }} </p>
+            {% if user.is_authenticated %}
+                <form name="new-bid" class="new-bid-form" method="POST" class="mb-3">
+                    {% csrf_token %}
+
+                    <label for="new-bid-input" class="form-label">New bid:</label>
+                    <input type="number" id="new-bid-input" class="form-control" name="new-bid"
+                           min="{{ listing.bid_data.minimum_bid }}" value="{{ listing.bid_data.minimum_bid }}"
+                           step="any">
+                    <p style="font-size: 0.8em; ">Minimum new bid: {{ listing.bid_data.minimum_bid }} </p>
+                    <input type="submit" value="Place new bid" class="btn btn-primary" >
+                </form>
+            {% else %}
+                <label for="new-bid-input" class="form-label">New bid: </label>
+                <input type="number" id="new-bid-input" class="form-control" name="new-bid"
+                       min="{{ listing.bid_data.minimum_bid }}" value="{{ listing.bid_data.minimum_bid }}" step="any"
+                       disabled="true" >
+                <p style="font-size: 0.8em;"> Minimum new bid: {{ listing.bid_data.minimum_bid }} </p>
+
+                <a href="{% url 'login' %}"> You must login to place a bid. </a>
+            {% endif %}
+        {% endif %}
+
+    </div>
+
+    <div class="listing-stats">
+        <ul>
+            <li>Listed by: {{ listing.auction.owner }}</li>
+            <li>Category: {{ listing.auction.item_category }}</li>
+            <li>Date listed: {{ listing.auction.creation_date }}</li>
+
+            {% if watch_count > 0 %}
+                <li>{{ watch_count }} watcher(s).</li>
+            {% else %}
+                <li>No current watchers</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <h4>Comments {{ listing.comments.count }}</h4>
+    {% if listing.comments %}
+        {% for comment in listing.comments %}
+            <div class="comment border rounded">
+                <div class="comment comment-header">{{ comment.get_username }} - {{ comment.posted_date }}</div>
+                <div class="comment comment-body">{{ comment.contents }}</div>
+            </div>
+        {% endfor %}
+    {% endif %}
     {% if user.is_authenticated %}
         <a href="{% url 'new_comment' listing.auction_pk %}" class="btn btn-primary comment-form">Submit new comment</a>
     {% endif %}
-
+    </div>
 {% endblock %}
